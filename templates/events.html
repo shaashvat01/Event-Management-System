@@ -1,0 +1,54 @@
+<!-- ALL EVENT RELATED TEMPLATES IN ONE FILE -->
+
+<!-- EVENT LIST -->
+<div id="event-list">
+    <h1>All Events</h1>
+    {{EVENTS_CONTENT}}
+</div>
+
+<!-- EVENT DETAILS -->
+<div id="event-details">
+    <h1>{{TITLE}}</h1>
+    <p><strong>Description:</strong> {{DESCRIPTION}}</p>
+    <p><strong>Date:</strong> {{DATE}}</p>
+    <p><strong>Location:</strong> {{LOCATION}}</p>
+    <p><strong>Status:</strong> {{STATUS}}</p>
+    <p><strong>Category:</strong> {{CATEGORY}}</p>
+    <p><strong>Category Description:</strong> {{CATEGORY_DESC}}</p>
+    <p><strong>Organizer:</strong> {{ORGANIZER}}</p>
+    {{REGISTRATION_SECTION}}
+    <br>
+    <a href="event.php" class="btn btn-secondary">Back to Events</a>
+</div>
+
+<!-- CREATE/EDIT EVENT FORM -->
+<div id="event-form">
+    <h1>{{FORM_TITLE}}</h1>
+    {{ERROR_MESSAGE}}
+    <form method="POST">
+        <label>Title:</label>
+        <input type="text" name="title" value="{{TITLE}}" required>
+        
+        <label>Description:</label>
+        <textarea name="description" required>{{DESCRIPTION}}</textarea>
+        
+        <label>Event Date and Time:</label>
+        <input type="datetime-local" name="event_date" value="{{EVENT_DATE}}" required>
+        
+        <label>Location:</label>
+        <input type="text" name="location" value="{{LOCATION}}" required>
+        
+        <label>Status:</label>
+        <select name="status" required>
+            {{STATUS_OPTIONS}}
+        </select>
+        
+        <label>Category:</label>
+        <select name="category_id" required>
+            {{CATEGORIES}}
+        </select>
+        
+        <button type="submit">{{SUBMIT_TEXT}}</button>
+        <a href="dashboard.php" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>

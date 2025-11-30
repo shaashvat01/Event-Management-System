@@ -1,0 +1,31 @@
+<!-- ORGANIZER DASHBOARD AND ANALYTICS -->
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+    <h1>Organizer Dashboard</h1>
+    <p>Welcome, {{USER_NAME}}!</p>
+    <a href="event.php?action=form" class="btn">Create New Event</a>
+    <h2>My Events</h2>
+    {{EVENTS_TABLE}}
+</div>
+
+<!-- ANALYTICS -->
+<div id="analytics">
+    <h1>Analytics Dashboard</h1>
+    <div class="event-card">
+        <h2>Your Event Statistics</h2>
+        <p><strong>Total Events Organized:</strong> {{TOTAL_EVENTS}}</p>
+        <p><strong>Total Registrations:</strong> {{TOTAL_REGISTRATIONS}}</p>
+        <p><strong>Total Attended:</strong> {{TOTAL_ATTENDED}}</p>
+        <p><strong>Total Cancelled:</strong> {{TOTAL_CANCELLED}}</p>
+    </div>
+    <a href="dashboard.php" class="btn btn-secondary">Back to Dashboard</a>
+</div>
+
+<!-- REGISTRATIONS -->
+<div id="registrations">
+    <h1>Registrations for: {{EVENT_TITLE}}</h1>
+    {{REGISTRATIONS_TABLE}}
+    <br>
+    <a href="dashboard.php" class="btn btn-secondary">Back to Dashboard</a>
+</div>
