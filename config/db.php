@@ -3,7 +3,7 @@
 
 // database credentials
 $host = 'localhost';
-$dbname = 'event_management';
+$dbname = 'Event_Management';
 $username = 'postgres';
 $password = ''; // no password needed for local setup
 

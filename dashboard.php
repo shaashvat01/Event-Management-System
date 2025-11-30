@@ -15,38 +15,38 @@ if ($action == 'analytics') {
     $uid = $_SESSION['user_id'];
     
     // count total events organized by this user
-    $sql = "SELECT COUNT(*) as total FROM \"Event\" WHERE e_userid = :uid";
+    $sql = "SELECT COUNT(*) as total FROM event WHERE e_userid = :uid";
     $stmt = $conn->prepare($sql);
     $stmt->execute([':uid' => $uid]);
     $total_events = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
     
     // count total registrations across all their events
-    $sql = "SELECT COUNT(*) as total FROM \"Registration\" r 
-            JOIN \"Event\" e ON r.r_eventid = e.e_eventid WHERE e.e_userid = :uid";
+    $sql = "SELECT COUNT(*) as total FROM registration r 
+            JOIN event e ON r.r_eventid = e.e_eventid WHERE e.e_userid = :uid";
     $stmt = $conn->prepare($sql);
     $stmt->execute([':uid' => $uid]);
     $total_regs = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
     
     // count how many people actually attended
-    $sql = "SELECT COUNT(*) as total FROM \"Registration\" r 
-            JOIN \"Event\" e ON r.r_eventid = e.e_eventid 
+    $sql = "SELECT COUNT(*) as total FROM registration r 
+            JOIN event e ON r.r_eventid = e.e_eventid 
             WHERE e.e_userid = :uid AND r.r_attendancestatus = 'attended'";
     $stmt = $conn->prepare($sql);
     $stmt->execute([':uid' => $uid]);
     $total_attended = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
     
     // count cancelled registrations
-    $sql = "SELECT COUNT(*) as total FROM \"Registration\" r 
-            JOIN \"Event\" e ON r.r_eventid = e.e_eventid 
+    $sql = "SELECT COUNT(*) as total FROM registration r 
+            JOIN event e ON r.r_eventid = e.e_eventid 
             WHERE e.e_userid = :uid AND r.r_attendancestatus = 'cancelled'";
     $stmt = $conn->prepare($sql);
     $stmt->execute([':uid' => $uid]);
     $total_cancelled = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
     
     // update analytics table with latest numbers
-    $sql = "INSERT INTO \"Analytics\" (a_userid, a_totaleventorganized, a_totaleventsattended, a_cancelledregistrations) 
+    $sql = "INSERT INTO analytics (a_userid, a_totaleventsorganized, a_totaleventsattended, a_cancelledregistrations) 
             VALUES (:uid, :org, 0, 0) ON CONFLICT (a_userid) 
-            DO UPDATE SET a_totaleventorganized = :org";
+            DO UPDATE SET a_totaleventsorganized = :org";
     $stmt = $conn->prepare($sql);
     $stmt->execute([':uid' => $uid, ':org' => $total_events]);
     
@@ -65,13 +65,13 @@ if ($action == 'analytics') {
 // REGISTRATIONS PAGE
 if ($action == 'registrations') {
     // get event title
-    $sql = "SELECT e_title FROM \"Event\" WHERE e_eventid = :id AND e_userid = :uid";
+    $sql = "SELECT e_title FROM event WHERE e_eventid = :id AND e_userid = :uid";
     $stmt = $conn->prepare($sql);
     $stmt->execute([':id' => $event_id, ':uid' => $_SESSION['user_id']]);
     $event = $stmt->fetch(PDO::FETCH_ASSOC);
     
     // get all registrations for this event with user info
-    $sql = "SELECT r.*, u.u_name, u.u_email FROM \"Registration\" r 
+    $sql = "SELECT r.*, u.u_name, u.u_email FROM registration r 
             JOIN \"User\" u ON r.r_userid = u.u_userid 
             WHERE r.r_eventid = :id ORDER BY r.r_registrationdate DESC";
     $stmt = $conn->prepare($sql);
@@ -84,7 +84,7 @@ if ($action == 'registrations') {
         $status = $_POST['status'];
         
         // update registration status
-        $sql = "UPDATE \"Registration\" SET r_attendancestatus = :status WHERE r_registrationid = :id";
+        $sql = "UPDATE registration SET r_attendancestatus = :status WHERE r_registrationid = :id";
         $stmt = $conn->prepare($sql);
         $stmt->execute([':status' => $status, ':id' => $reg_id]);
         
@@ -137,8 +137,8 @@ if ($action == 'registrations') {
 render_header();
 
 // get all events created by this organizer
-$sql = "SELECT e.*, c.c_name as category_name FROM \"Event\" e 
-        JOIN \"Category\" c ON e.e_categoryid = c.c_categoryid 
+$sql = "SELECT e.*, c.c_name as category_name FROM event e 
+        JOIN category c ON e.e_categoryid = c.c_categoryid 
         WHERE e.e_userid = :uid ORDER BY e.e_eventdate DESC";
 $stmt = $conn->prepare($sql);
 $stmt->execute([':uid' => $_SESSION['user_id']]);

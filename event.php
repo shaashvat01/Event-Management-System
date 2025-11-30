@@ -14,12 +14,12 @@ if ($action == 'delete' && $_SERVER['REQUEST_METHOD'] == 'POST') {
     $event_id = $_POST['event_id'];
     
     // first delete all registrations for this event
-    $sql = "DELETE FROM \"Registration\" WHERE r_eventid = :id";
+    $sql = "DELETE FROM registration WHERE r_eventid = :id";
     $stmt = $conn->prepare($sql);
     $stmt->execute([':id' => $event_id]);
     
     // then delete the event itself
-    $sql = "DELETE FROM \"Event\" WHERE e_eventid = :id AND e_userid = :uid";
+    $sql = "DELETE FROM event WHERE e_eventid = :id AND e_userid = :uid";
     $stmt = $conn->prepare($sql);
     $stmt->execute([':id' => $event_id, ':uid' => $_SESSION['user_id']]);
     
@@ -36,14 +36,14 @@ if ($action == 'form') {
     $event = ['e_title' => '', 'e_description' => '', 'e_eventdate' => '', 'e_location' => '', 'e_status' => 'upcoming', 'e_categoryid' => ''];
     
     // get all categories from database for dropdown
-    $sql = "SELECT * FROM \"Category\"";
+    $sql = "SELECT * FROM category";
     $stmt = $conn->prepare($sql);
     $stmt->execute();
     $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     // if editing existing event load its data
     if ($event_id) {
-        $sql = "SELECT * FROM \"Event\" WHERE e_eventid = :id AND e_userid = :uid";
+        $sql = "SELECT * FROM event WHERE e_eventid = :id AND e_userid = :uid";
         $stmt = $conn->prepare($sql);
         $stmt->execute([':id' => $event_id, ':uid' => $_SESSION['user_id']]);
         $event = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -61,20 +61,20 @@ if ($action == 'form') {
         
         if ($event_id) {
             // update existing event
-            $sql = "UPDATE \"Event\" SET e_title=:t, e_description=:d, e_eventdate=:dt, e_location=:l, e_status=:s, e_categoryid=:c WHERE e_eventid=:id";
+            $sql = "UPDATE event SET e_title=:t, e_description=:d, e_eventdate=:dt, e_location=:l, e_status=:s, e_categoryid=:c WHERE e_eventid=:id";
             $stmt = $conn->prepare($sql);
             $stmt->execute([':t'=>$title, ':d'=>$desc, ':dt'=>$date, ':l'=>$location, ':s'=>$status, ':c'=>$cat_id, ':id'=>$event_id]);
         } else {
             // create new event
-            $sql = "INSERT INTO \"Event\" (e_title, e_description, e_eventdate, e_location, e_status, e_userid, e_categoryid) 
+            $sql = "INSERT INTO event (e_title, e_description, e_eventdate, e_location, e_status, e_userid, e_categoryid) 
                     VALUES (:t, :d, :dt, :l, :s, :u, :c)";
             $stmt = $conn->prepare($sql);
             $stmt->execute([':t'=>$title, ':d'=>$desc, ':dt'=>$date, ':l'=>$location, ':s'=>$status, ':u'=>$_SESSION['user_id'], ':c'=>$cat_id]);
             
             // update analytics table to track total events organized
-            $sql = "INSERT INTO \"Analytics\" (a_userid, a_totaleventorganized, a_totaleventsattended, a_cancelledregistrations) 
+            $sql = "INSERT INTO analytics (a_userid, a_totaleventsorganized, a_totaleventsattended, a_cancelledregistrations) 
                     VALUES (:u, 1, 0, 0) ON CONFLICT (a_userid) 
-                    DO UPDATE SET a_totaleventorganized = \"Analytics\".a_totaleventorganized + 1";
+                    DO UPDATE SET a_totaleventsorganized = analytics.a_totaleventsorganized + 1";
             $stmt = $conn->prepare($sql);
             $stmt->execute([':u' => $_SESSION['user_id']]);
         }
@@ -123,8 +123,8 @@ if ($action == 'details') {
     
     // get event with category and organizer info
     $sql = "SELECT e.*, c.c_name as category_name, c.c_description as category_desc, u.u_name as organizer_name 
-            FROM \"Event\" e 
-            JOIN \"Category\" c ON e.e_categoryid = c.c_categoryid 
+            FROM event e 
+            JOIN category c ON e.e_categoryid = c.c_categoryid 
             JOIN \"User\" u ON e.e_userid = u.u_userid 
             WHERE e.e_eventid = :id";
     $stmt = $conn->prepare($sql);
@@ -135,7 +135,7 @@ if ($action == 'details') {
     // if user is participant show registration options
     if (isset($_SESSION['user_id']) && $_SESSION['role'] == 'participant') {
         // check if already registered
-        $sql = "SELECT r_attendancestatus FROM \"Registration\" WHERE r_userid = :uid AND r_eventid = :eid";
+        $sql = "SELECT r_attendancestatus FROM registration WHERE r_userid = :uid AND r_eventid = :eid";
         $stmt = $conn->prepare($sql);
         $stmt->execute([':uid' => $_SESSION['user_id'], ':eid' => $event_id]);
         $reg = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -179,8 +179,8 @@ render_header();
 
 // get all events with category and organizer names
 $sql = "SELECT e.*, c.c_name as category_name, u.u_name as organizer_name 
-        FROM \"Event\" e 
-        JOIN \"Category\" c ON e.e_categoryid = c.c_categoryid 
+        FROM event e 
+        JOIN category c ON e.e_categoryid = c.c_categoryid 
         JOIN \"User\" u ON e.e_userid = u.u_userid 
         ORDER BY e.e_eventdate DESC";
 $stmt = $conn->prepare($sql);
